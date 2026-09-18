@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Taskboard</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%85%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231C7A88'/%3E%3Ctext x='50' y='68' font-size='58' font-family='Arial' font-weight='900' fill='white' text-anchor='middle'%3E%E2%9C%93%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
   :root{
     --bg:#FAF8F4; --surface:#FFFFFF; --surface-2:#F1EEE7; --border:#E3DFD6;
     --text:#211F1A; --text-muted:#6B6559; --text-faint:#9C9587;
-    --accent:#2F6F62; --accent-ink:#FFFFFF; --accent-soft:#DCEAE6;
+    --accent:#1C7A88; --accent-ink:#FFFFFF; --accent-soft:#D9EEF1;
     --p-high:#C9483F; --p-high-bg:#F8E1DE; --p-medium:#C98A1F; --p-medium-bg:#F8EAD2;
     --p-low:#3568C6; --p-low-bg:#DEE7FA;
     --danger:#C9483F; --good:#2F6F62;
@@ -22,7 +22,7 @@
     :root:not([data-theme="light"]){
       --bg:#15181A; --surface:#1C2023; --surface-2:#23282B; --border:#33393C;
       --text:#ECEAE4; --text-muted:#A3A79E; --text-faint:#6E736C;
-      --accent:#5FB39F; --accent-ink:#0B1917; --accent-soft:#20302B;
+      --accent:#4FB6C4; --accent-ink:#072226; --accent-soft:#1C3438;
       --p-high:#E2665C; --p-high-bg:#3A2320; --p-medium:#E6AC55; --p-medium-bg:#3A2E18;
       --p-low:#7DA0E8; --p-low-bg:#1E2A40;
       --danger:#E2665C; --good:#5FB39F;
@@ -32,7 +32,7 @@
   :root[data-theme="dark"]{
     --bg:#15181A; --surface:#1C2023; --surface-2:#23282B; --border:#33393C;
     --text:#ECEAE4; --text-muted:#A3A79E; --text-faint:#6E736C;
-    --accent:#5FB39F; --accent-ink:#0B1917; --accent-soft:#20302B;
+    --accent:#4FB6C4; --accent-ink:#072226; --accent-soft:#1C3438;
     --p-high:#E2665C; --p-high-bg:#3A2320; --p-medium:#E6AC55; --p-medium-bg:#3A2E18;
     --p-low:#7DA0E8; --p-low-bg:#1E2A40;
     --danger:#E2665C; --good:#5FB39F;
@@ -57,7 +57,7 @@
   #authScreen{min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:24px;}
   .auth-card{width:100%; max-width:380px; background:var(--surface); border:1px solid var(--border); border-radius:20px; box-shadow:var(--shadow); padding:32px 28px;}
   .auth-brand{display:flex; align-items:center; gap:10px; margin-bottom:6px;}
-  .auth-brand .mark{width:34px; height:34px; border-radius:9px; background:var(--accent); color:var(--accent-ink); display:flex; align-items:center; justify-content:center; font-size:18px;}
+  .auth-brand .mark{width:34px; height:34px; border-radius:9px; background:var(--accent); color:var(--accent-ink); display:flex; align-items:center; justify-content:center; font-size:19px; font-weight:800;}
   .auth-brand h1{font-size:22px; font-weight:600; margin:0;}
   .auth-sub{color:var(--text-muted); font-size:13.5px; margin:0 0 22px;}
   .auth-tabs{display:flex; gap:4px; background:var(--surface-2); padding:4px; border-radius:10px; margin-bottom:20px;}
@@ -81,7 +81,7 @@
   #appScreen{display:grid; grid-template-columns:250px 1fr; min-height:100dvh;}
   .sidebar{background:var(--surface); border-right:1px solid var(--border); padding:20px 16px; display:flex; flex-direction:column; gap:20px; position:sticky; top:0; height:100dvh; overflow-y:auto;}
   .brand{display:flex; align-items:center; gap:9px;}
-  .brand .mark{width:28px; height:28px; border-radius:8px; background:var(--accent); color:var(--accent-ink); display:flex; align-items:center; justify-content:center; font-size:15px;}
+  .brand .mark{width:28px; height:28px; border-radius:8px; background:var(--accent); color:var(--accent-ink); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:800;}
   .brand h1{font-size:18px; margin:0; font-weight:600;}
   .nav{display:flex; flex-direction:column; gap:2px;}
   .nav button{display:flex; justify-content:space-between; align-items:center; border:none; background:none; text-align:left; padding:9px 10px; border-radius:9px; color:var(--text-muted); font-weight:600; font-size:14px;}
@@ -111,14 +111,22 @@
   .sidebar-scrim{display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:55;}
   .sidebar-scrim.show{display:block;}
 
-  .main{padding:26px 32px 80px; max-width:900px;}
+  .main{padding:26px 32px 80px; max-width:1180px;}
   .topbar{display:flex; gap:10px; align-items:center; margin-bottom:20px; flex-wrap:wrap;}
   .topbar h2{font-size:24px; margin:0; font-weight:600; flex:none;}
   #search{flex:1; min-width:160px; padding:10px 13px; border-radius:10px; border:1px solid var(--border); background:var(--surface); color:var(--text);}
   select.sort-select{padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:var(--surface); color:var(--text);}
   .menu-btn{display:none;}
+  .view-toggle{display:flex; border:1px solid var(--border); border-radius:10px; overflow:hidden; flex:none;}
+  .view-toggle button{border:none; background:var(--surface); padding:9px 10px; color:var(--text-muted); font-size:13px; line-height:1;}
+  .view-toggle button.active{background:var(--accent-soft); color:var(--accent);}
 
   #taskList{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px;}
+  #taskList.tiles-2{display:grid; grid-template-columns:repeat(2,1fr); gap:14px; align-items:start;}
+  #taskList.tiles-3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; align-items:start;}
+  @media (max-width:900px){
+    #taskList.tiles-2, #taskList.tiles-3{grid-template-columns:1fr;}
+  }
   li.task{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:13px 14px 13px 0; position:relative; overflow:hidden;}
   li.task::before{content:""; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--p-low);}
   li.task[data-priority="high"]::before{background:var(--p-high);}
@@ -208,7 +216,7 @@
 
 <div id="authScreen" hidden>
   <div class="auth-card">
-    <div class="auth-brand"><div class="mark">✅</div><h1 class="display">Taskboard</h1></div>
+    <div class="auth-brand"><div class="mark">✓</div><h1 class="display">Taskboard</h1></div>
     <p class="auth-sub">Your tasks, synced everywhere you log in.</p>
     <div class="auth-tabs">
       <button type="button" id="tabLogin" class="active">Log in</button>
@@ -226,7 +234,7 @@
 <div id="appScreen" hidden>
   <div class="sidebar-scrim" id="sidebarScrim"></div>
   <aside class="sidebar" id="sidebar">
-    <div class="brand"><div class="mark">✅</div><h1 class="display">Taskboard</h1></div>
+    <div class="brand"><div class="mark">✓</div><h1 class="display">Taskboard</h1></div>
     <nav class="nav" id="viewNav">
       <button type="button" data-view="active" class="active">Active <span class="count" id="countActive">0</span></button>
       <button type="button" data-view="completed">Completed <span class="count" id="countDone">0</span></button>
@@ -291,6 +299,11 @@
         <option value="created">Newest</option>
         <option value="az">A–Z</option>
       </select>
+      <div class="view-toggle" id="viewToggle">
+        <button type="button" data-mode="list" class="active" title="List view">☰</button>
+        <button type="button" data-mode="tiles-2" title="2 tiles per row">▦</button>
+        <button type="button" data-mode="tiles-3" title="3 tiles per row">▤</button>
+      </div>
       <button type="button" class="btn btn-primary" id="newTaskBtn" style="width:auto;">+ New task</button>
     </div>
 
@@ -410,11 +423,38 @@ if(SUPABASE_URL.startsWith("REPLACE_WITH")){
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const PALETTE = ["#2F6F62","#7A4FC9","#C2478A","#4A55C7","#A9633B","#4C8B3B","#1C8CA8","#B15A2E"];
+// Muted, non-bright hues only — deliberately avoids red/amber/blue (used by
+// priority) and teal/cyan (used by the app accent) so no chip color is ever
+// mistaken for a status indicator.
+const PALETTE = [
+  "#4C7A3F","#6B8E3D","#2F8558","#5B4FA0","#7A4FC9","#9C4FA8","#C2478A",
+  "#A8437A","#8C3F5C","#A9633B","#7A5230","#8B5A2B","#6B7280","#5A6E8C"
+];
 function hashColor(str){
   let h = 0;
   for(let i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) >>> 0; }
   return PALETTE[h % PALETTE.length];
+}
+// Deterministic, collision-free color assignment: every distinct name in the
+// set gets its own palette slot (alphabetical order, so it's stable across
+// devices and reloads) instead of a hash, which can't guarantee uniqueness.
+function assignColors(names){
+  const sorted = Array.from(new Set(names)).filter(Boolean).sort((a,b) => a.localeCompare(b));
+  const map = {};
+  sorted.forEach((name, i) => { map[name] = PALETTE[i % PALETTE.length]; });
+  return map;
+}
+let teamColorMap = {}, teamMemberColorMap = {}, categoryColorMap = {};
+function rebuildColorMaps(){
+  const teamNames = new Set(), memberNames = new Set(), catNames = new Set();
+  tasks.forEach(t => {
+    if(t.team_name) teamNames.add(t.team_name);
+    (t.team_members||[]).forEach(n => memberNames.add(n));
+    (t.categories||[]).forEach(c => catNames.add(c));
+  });
+  teamColorMap = assignColors(teamNames);
+  teamMemberColorMap = assignColors(memberNames);
+  categoryColorMap = assignColors(catNames);
 }
 const NOTE_COLORS = [
   { bg:"#FFF3C4", ink:"#6B5A12" },
@@ -604,6 +644,7 @@ document.querySelectorAll("#viewNav button").forEach(b => {
     document.getElementById("taskFilters").hidden = view === "notes";
     document.getElementById("sortSelect").hidden = view === "notes";
     document.getElementById("newTaskBtn").hidden = view === "notes";
+    document.getElementById("viewToggle").hidden = view === "notes";
     document.getElementById("search").placeholder = view === "notes" ? "Search post-its…" : "Search tasks…";
     document.getElementById("tasksSection").hidden = view === "notes";
     document.getElementById("notesSection").hidden = view !== "notes";
@@ -642,6 +683,22 @@ function updateFiltersBadge(){
 document.getElementById("search").addEventListener("input", (e) => { search = e.target.value.toLowerCase(); render(); });
 document.getElementById("sortSelect").addEventListener("change", (e) => { sortKey = e.target.value; render(); });
 
+const taskListEl = document.getElementById("taskList");
+let viewMode = localStorage.getItem("tb_view_mode") || "list";
+function applyViewMode(){
+  taskListEl.classList.remove("tiles-2","tiles-3");
+  if(viewMode !== "list") taskListEl.classList.add(viewMode);
+  document.querySelectorAll("#viewToggle button").forEach(b => b.classList.toggle("active", b.dataset.mode === viewMode));
+}
+document.querySelectorAll("#viewToggle button").forEach(b => {
+  b.addEventListener("click", () => {
+    viewMode = b.dataset.mode;
+    localStorage.setItem("tb_view_mode", viewMode);
+    applyViewMode();
+  });
+});
+applyViewMode();
+
 const menuBtn = document.getElementById("menuBtn");
 const sidebar = document.getElementById("sidebar");
 const scrim = document.getElementById("sidebarScrim");
@@ -662,6 +719,7 @@ function isOverdue(t){ return t.due_date && t.status === "active" && new Date(t.
 
 function render(){
   updateFiltersBadge();
+  rebuildColorMaps();
   if(view === "notes"){ renderNotes(); return; }
 
   const active = tasks.filter(t => t.status === "active");
@@ -676,9 +734,9 @@ function render(){
     (t.team_members||[]).forEach(n => names.teamMember.add(n));
     (t.categories||[]).forEach(c => names.category.add(c));
   });
-  renderSideList("fTeam", names.team, "team");
-  renderSideList("fTeamMember", names.teamMember, "teamMember");
-  renderSideList("fCategory", names.category, "category");
+  renderSideList("fTeam", names.team, "team", teamColorMap);
+  renderSideList("fTeamMember", names.teamMember, "teamMember", teamMemberColorMap);
+  renderSideList("fCategory", names.category, "category", categoryColorMap);
 
   let pool = view === "active" ? active : done;
   pool = pool.filter(t => {
@@ -713,7 +771,7 @@ function render(){
   document.getElementById("emptySub").textContent = view === "active" ? 'Click "+ New task" to add your first one.' : "Tasks you finish will show up here.";
 }
 
-function renderSideList(id, set, key){
+function renderSideList(id, set, key, colorMap){
   const container = document.getElementById(id);
   container.innerHTML = "";
   Array.from(set).sort().forEach(name => {
@@ -721,7 +779,7 @@ function renderSideList(id, set, key){
     b.type = "button";
     if(filters[key].has(name)) b.classList.add("active");
     const dot = document.createElement("span");
-    dot.className = "dot"; dot.style.background = hashColor(name);
+    dot.className = "dot"; dot.style.background = (colorMap && colorMap[name]) || hashColor(name);
     b.appendChild(dot);
     b.appendChild(document.createTextNode(name));
     b.addEventListener("click", () => {
@@ -781,14 +839,14 @@ function taskCard(t){
   chips.className = "chips";
   if(t.work_mode === "team"){
     if(t.team_name){
-      const c = hashColor(t.team_name);
+      const c = teamColorMap[t.team_name] || hashColor(t.team_name);
       const chip = document.createElement("span");
       chip.className = "chip"; chip.style.background = c + "22"; chip.style.color = c;
       chip.textContent = "👥 " + t.team_name;
       chips.appendChild(chip);
     }
     (t.team_members||[]).forEach(name => {
-      const c = hashColor(name);
+      const c = teamMemberColorMap[name] || hashColor(name);
       const chip = document.createElement("span");
       chip.className = "chip"; chip.style.background = c + "22"; chip.style.color = c;
       chip.textContent = "👤 " + name;
@@ -800,7 +858,7 @@ function taskCard(t){
     chips.appendChild(chip);
   }
   (t.categories||[]).forEach(cat => {
-    const c = hashColor(cat);
+    const c = categoryColorMap[cat] || hashColor(cat);
     const chip = document.createElement("span");
     chip.className = "chip";
     chip.style.background = c + "22"; chip.style.color = c;
@@ -996,7 +1054,7 @@ document.getElementById("fSubtaskInput").addEventListener("keydown", e => {
 function renderModalChips(){
   const tc = document.getElementById("fTeamMemberChips"); tc.innerHTML = "";
   modalTeamMembers.forEach((name, idx) => {
-    const c = hashColor(name);
+    const c = teamMemberColorMap[name] || hashColor(name);
     const chip = document.createElement("span"); chip.className = "chip";
     chip.style.background = c + "22"; chip.style.color = c;
     chip.textContent = "👤 " + name + " ";
@@ -1006,7 +1064,7 @@ function renderModalChips(){
   });
   const cc = document.getElementById("fCategoryChips"); cc.innerHTML = "";
   modalCategories.forEach((name, idx) => {
-    const c = hashColor(name);
+    const c = categoryColorMap[name] || hashColor(name);
     const chip = document.createElement("span"); chip.className = "chip";
     chip.style.background = c + "22"; chip.style.color = c;
     chip.textContent = name + " ";
