@@ -88,6 +88,12 @@
   .nav button.active{background:var(--accent-soft); color:var(--accent);}
   .nav button .count{font-size:12px; font-weight:600; color:var(--text-faint);}
   .nav button.active .count{color:var(--accent);}
+  .filters-toggle{display:flex; align-items:center; gap:6px; width:100%; border:1px solid var(--border); background:var(--surface-2); border-radius:9px; padding:8px 10px; font-weight:600; font-size:13px; color:var(--text-muted);}
+  .filters-toggle:hover{color:var(--text);}
+  .filters-toggle .count{background:var(--accent); color:var(--accent-ink); border-radius:999px; padding:1px 7px; font-size:11px;}
+  .filters-toggle .caret{margin-left:auto; transition:transform .15s ease;}
+  .filters-toggle[aria-expanded="true"] .caret{transform:rotate(180deg);}
+  #filterGroups{display:flex; flex-direction:column; gap:20px; margin-top:14px;}
   .side-group{display:flex; flex-direction:column; gap:8px;}
   .side-group .label{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint);}
   .chipset{display:flex; gap:6px; flex-wrap:wrap;}
@@ -101,6 +107,9 @@
   .user-email{font-size:12px; color:var(--text-faint); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .icon-btn{border:1px solid var(--border); background:var(--surface); border-radius:8px; padding:7px 9px; color:var(--text-muted); line-height:1;}
   .icon-btn:hover{background:var(--surface-2); color:var(--text);}
+
+  .sidebar-scrim{display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:55;}
+  .sidebar-scrim.show{display:block;}
 
   .main{padding:26px 32px 80px; max-width:900px;}
   .topbar{display:flex; gap:10px; align-items:center; margin-bottom:20px; flex-wrap:wrap;}
@@ -183,8 +192,6 @@
     #appScreen{grid-template-columns:1fr;}
     .sidebar{position:fixed; left:-280px; top:0; width:260px; z-index:60; transition:left .2s ease; box-shadow:var(--shadow);}
     .sidebar.open{left:0;}
-    .sidebar-scrim{display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:55;}
-    .sidebar-scrim.show{display:block;}
     .menu-btn{display:inline-flex;}
     .main{padding:16px 14px 90px;}
     .topbar h2{font-size:20px;}
@@ -225,41 +232,46 @@
       <button type="button" data-view="completed">Completed <span class="count" id="countDone">0</span></button>
       <button type="button" data-view="notes">Post-its <span class="count" id="countNotes">0</span></button>
     </nav>
-    <div id="taskFilters" style="display:flex; flex-direction:column; gap:20px;">
-      <div class="side-group">
-        <div class="label">Priority</div>
-        <div class="chipset" id="fPriority">
-          <button type="button" data-val="high">High</button>
-          <button type="button" data-val="medium">Medium</button>
-          <button type="button" data-val="low">Low</button>
+    <div id="taskFilters">
+      <button type="button" class="filters-toggle" id="filtersToggle" aria-expanded="false">
+        Filters <span id="filtersActiveCount" class="count" hidden>0</span> <span class="caret" id="filtersCaret">⌄</span>
+      </button>
+      <div id="filterGroups" hidden>
+        <div class="side-group">
+          <div class="label">Priority</div>
+          <div class="chipset" id="fPriority">
+            <button type="button" data-val="high">High</button>
+            <button type="button" data-val="medium">Medium</button>
+            <button type="button" data-val="low">Low</button>
+          </div>
         </div>
-      </div>
-      <div class="side-group">
-        <div class="label">Type</div>
-        <div class="chipset" id="fType">
-          <button type="button" data-val="one-time">One-time</button>
-          <button type="button" data-val="recurring">Recurring</button>
-          <button type="button" data-val="followup">Follow-up</button>
+        <div class="side-group">
+          <div class="label">Type</div>
+          <div class="chipset" id="fType">
+            <button type="button" data-val="one-time">One-time</button>
+            <button type="button" data-val="recurring">Recurring</button>
+            <button type="button" data-val="followup">Follow-up</button>
+          </div>
         </div>
-      </div>
-      <div class="side-group">
-        <div class="label">Working</div>
-        <div class="chipset" id="fWorkMode">
-          <button type="button" data-val="solo">Solo</button>
-          <button type="button" data-val="team">With team</button>
+        <div class="side-group">
+          <div class="label">Working</div>
+          <div class="chipset" id="fWorkMode">
+            <button type="button" data-val="solo">Solo</button>
+            <button type="button" data-val="team">With team</button>
+          </div>
         </div>
-      </div>
-      <div class="side-group">
-        <div class="label">Team</div>
-        <div class="side-list" id="fTeam"></div>
-      </div>
-      <div class="side-group">
-        <div class="label">Team member</div>
-        <div class="side-list" id="fTeamMember"></div>
-      </div>
-      <div class="side-group">
-        <div class="label">Category</div>
-        <div class="side-list" id="fCategory"></div>
+        <div class="side-group">
+          <div class="label">Team</div>
+          <div class="side-list" id="fTeam"></div>
+        </div>
+        <div class="side-group">
+          <div class="label">Team member</div>
+          <div class="side-list" id="fTeamMember"></div>
+        </div>
+        <div class="side-group">
+          <div class="label">Category</div>
+          <div class="side-list" id="fCategory"></div>
+        </div>
       </div>
     </div>
     <div class="sidebar-foot">
@@ -613,6 +625,20 @@ wireFilterChipset("fPriority","priority");
 wireFilterChipset("fType","type");
 wireFilterChipset("fWorkMode","workMode");
 
+const filtersToggle = document.getElementById("filtersToggle");
+const filterGroups = document.getElementById("filterGroups");
+filtersToggle.addEventListener("click", () => {
+  const willShow = filterGroups.hidden;
+  filterGroups.hidden = !willShow;
+  filtersToggle.setAttribute("aria-expanded", String(willShow));
+});
+function updateFiltersBadge(){
+  const n = filters.priority.size + filters.type.size + filters.workMode.size + filters.team.size + filters.teamMember.size + filters.category.size;
+  const badge = document.getElementById("filtersActiveCount");
+  badge.hidden = n === 0;
+  badge.textContent = n;
+}
+
 document.getElementById("search").addEventListener("input", (e) => { search = e.target.value.toLowerCase(); render(); });
 document.getElementById("sortSelect").addEventListener("change", (e) => { sortKey = e.target.value; render(); });
 
@@ -635,6 +661,7 @@ function fmtDate(d){
 function isOverdue(t){ return t.due_date && t.status === "active" && new Date(t.due_date + "T23:59:59") < new Date(); }
 
 function render(){
+  updateFiltersBadge();
   if(view === "notes"){ renderNotes(); return; }
 
   const active = tasks.filter(t => t.status === "active");
