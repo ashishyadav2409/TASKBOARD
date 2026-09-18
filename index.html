@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Taskboard</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231C7A88'/%3E%3Ctext x='50' y='68' font-size='58' font-family='Arial' font-weight='900' fill='white' text-anchor='middle'%3E%E2%9C%93%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%238A6A17'/%3E%3Ctext x='50' y='68' font-size='58' font-family='Arial' font-weight='900' fill='white' text-anchor='middle'%3E%E2%9C%93%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
   :root{
     --bg:#FAF8F4; --surface:#FFFFFF; --surface-2:#F1EEE7; --border:#E3DFD6;
     --text:#211F1A; --text-muted:#6B6559; --text-faint:#9C9587;
-    --accent:#1C7A88; --accent-ink:#FFFFFF; --accent-soft:#D9EEF1;
+    --accent:#8A6A17; --accent-ink:#FFFFFF; --accent-soft:#F0E6C8;
     --p-high:#C9483F; --p-high-bg:#F8E1DE; --p-medium:#C98A1F; --p-medium-bg:#F8EAD2;
     --p-low:#3568C6; --p-low-bg:#DEE7FA;
     --danger:#C9483F; --good:#2F6F62;
@@ -22,7 +22,7 @@
     :root:not([data-theme="light"]){
       --bg:#15181A; --surface:#1C2023; --surface-2:#23282B; --border:#33393C;
       --text:#ECEAE4; --text-muted:#A3A79E; --text-faint:#6E736C;
-      --accent:#4FB6C4; --accent-ink:#072226; --accent-soft:#1C3438;
+      --accent:#D4A94A; --accent-ink:#2A2008; --accent-soft:#3A2E12;
       --p-high:#E2665C; --p-high-bg:#3A2320; --p-medium:#E6AC55; --p-medium-bg:#3A2E18;
       --p-low:#7DA0E8; --p-low-bg:#1E2A40;
       --danger:#E2665C; --good:#5FB39F;
@@ -32,7 +32,7 @@
   :root[data-theme="dark"]{
     --bg:#15181A; --surface:#1C2023; --surface-2:#23282B; --border:#33393C;
     --text:#ECEAE4; --text-muted:#A3A79E; --text-faint:#6E736C;
-    --accent:#4FB6C4; --accent-ink:#072226; --accent-soft:#1C3438;
+    --accent:#D4A94A; --accent-ink:#2A2008; --accent-soft:#3A2E12;
     --p-high:#E2665C; --p-high-bg:#3A2320; --p-medium:#E6AC55; --p-medium-bg:#3A2E18;
     --p-low:#7DA0E8; --p-low-bg:#1E2A40;
     --danger:#E2665C; --good:#5FB39F;
@@ -423,12 +423,16 @@ if(SUPABASE_URL.startsWith("REPLACE_WITH")){
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-// Muted, non-bright hues only — deliberately avoids red/amber/blue (used by
-// priority) and teal/cyan (used by the app accent) so no chip color is ever
-// mistaken for a status indicator.
+// Deliberately avoids red/amber/blue (priority colors) and gold/mustard (the
+// app accent). Within that, hues are spread as far apart as possible AND
+// alternate in lightness/saturation between neighbors — hue alone isn't
+// enough for quick visual differentiation; two muted greens still read as
+// "the same-ish color" at a glance, so adjacent entries are deliberately
+// pushed apart in both dimensions, not just around the color wheel.
 const PALETTE = [
-  "#4C7A3F","#6B8E3D","#2F8558","#5B4FA0","#7A4FC9","#9C4FA8","#C2478A",
-  "#A8437A","#8C3F5C","#A9633B","#7A5230","#8B5A2B","#6B7280","#5A6E8C"
+  "#6B7A1F","#1E8449","#0E9174","#0E7C86","#1868A0",
+  "#4A4FB0","#7C4FD1","#9A3FC2","#C13F9E","#C23E72",
+  "#8A2F4C","#6B5A45","#55677A"
 ];
 function hashColor(str){
   let h = 0;
@@ -841,14 +845,14 @@ function taskCard(t){
     if(t.team_name){
       const c = teamColorMap[t.team_name] || hashColor(t.team_name);
       const chip = document.createElement("span");
-      chip.className = "chip"; chip.style.background = c + "22"; chip.style.color = c;
+      chip.className = "chip"; chip.style.background = c + "38"; chip.style.color = c;
       chip.textContent = "👥 " + t.team_name;
       chips.appendChild(chip);
     }
     (t.team_members||[]).forEach(name => {
       const c = teamMemberColorMap[name] || hashColor(name);
       const chip = document.createElement("span");
-      chip.className = "chip"; chip.style.background = c + "22"; chip.style.color = c;
+      chip.className = "chip"; chip.style.background = c + "38"; chip.style.color = c;
       chip.textContent = "👤 " + name;
       chips.appendChild(chip);
     });
@@ -861,7 +865,7 @@ function taskCard(t){
     const c = categoryColorMap[cat] || hashColor(cat);
     const chip = document.createElement("span");
     chip.className = "chip";
-    chip.style.background = c + "22"; chip.style.color = c;
+    chip.style.background = c + "38"; chip.style.color = c;
     chip.textContent = cat;
     chips.appendChild(chip);
   });
@@ -1056,7 +1060,7 @@ function renderModalChips(){
   modalTeamMembers.forEach((name, idx) => {
     const c = teamMemberColorMap[name] || hashColor(name);
     const chip = document.createElement("span"); chip.className = "chip";
-    chip.style.background = c + "22"; chip.style.color = c;
+    chip.style.background = c + "38"; chip.style.color = c;
     chip.textContent = "👤 " + name + " ";
     const rm = document.createElement("button"); rm.type = "button"; rm.className = "rm"; rm.textContent = "×";
     rm.addEventListener("click", () => { modalTeamMembers.splice(idx,1); renderModalChips(); });
@@ -1066,7 +1070,7 @@ function renderModalChips(){
   modalCategories.forEach((name, idx) => {
     const c = categoryColorMap[name] || hashColor(name);
     const chip = document.createElement("span"); chip.className = "chip";
-    chip.style.background = c + "22"; chip.style.color = c;
+    chip.style.background = c + "38"; chip.style.color = c;
     chip.textContent = name + " ";
     const rm = document.createElement("button"); rm.type = "button"; rm.className = "rm"; rm.textContent = "×";
     rm.addEventListener("click", () => { modalCategories.splice(idx,1); renderModalChips(); });
