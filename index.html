@@ -1,0 +1,1053 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Taskboard</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%85%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  :root{
+    --bg:#FAF8F4; --surface:#FFFFFF; --surface-2:#F1EEE7; --border:#E3DFD6;
+    --text:#211F1A; --text-muted:#6B6559; --text-faint:#9C9587;
+    --accent:#2F6F62; --accent-ink:#FFFFFF; --accent-soft:#DCEAE6;
+    --p-high:#C9483F; --p-high-bg:#F8E1DE; --p-medium:#C98A1F; --p-medium-bg:#F8EAD2;
+    --p-low:#3568C6; --p-low-bg:#DEE7FA;
+    --danger:#C9483F; --good:#2F6F62;
+    --shadow:0 1px 2px rgba(30,26,18,.05), 0 10px 30px rgba(30,26,18,.06);
+    --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#15181A; --surface:#1C2023; --surface-2:#23282B; --border:#33393C;
+      --text:#ECEAE4; --text-muted:#A3A79E; --text-faint:#6E736C;
+      --accent:#5FB39F; --accent-ink:#0B1917; --accent-soft:#20302B;
+      --p-high:#E2665C; --p-high-bg:#3A2320; --p-medium:#E6AC55; --p-medium-bg:#3A2E18;
+      --p-low:#7DA0E8; --p-low-bg:#1E2A40;
+      --danger:#E2665C; --good:#5FB39F;
+      --shadow:0 1px 2px rgba(0,0,0,.35), 0 10px 30px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#15181A; --surface:#1C2023; --surface-2:#23282B; --border:#33393C;
+    --text:#ECEAE4; --text-muted:#A3A79E; --text-faint:#6E736C;
+    --accent:#5FB39F; --accent-ink:#0B1917; --accent-soft:#20302B;
+    --p-high:#E2665C; --p-high-bg:#3A2320; --p-medium:#E6AC55; --p-medium-bg:#3A2E18;
+    --p-low:#7DA0E8; --p-low-bg:#1E2A40;
+    --danger:#E2665C; --good:#5FB39F;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 10px 30px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:"Work Sans", ui-sans-serif, system-ui, sans-serif;
+    font-size:15px; line-height:1.45; -webkit-font-smoothing:antialiased;
+  }
+  .display{font-family:"Fraunces", Georgia, serif;}
+  .mono{font-family:"IBM Plex Mono", ui-monospace, monospace; font-variant-numeric:tabular-nums;}
+  button, input, select, textarea{font-family:inherit; font-size:inherit; color:inherit;}
+  button{cursor:pointer;}
+  a{color:var(--accent);}
+  ::selection{background:var(--accent-soft);}
+  [hidden]{display:none !important;}
+
+  /* ---------------- Auth screen ---------------- */
+  #authScreen{min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:24px;}
+  .auth-card{width:100%; max-width:380px; background:var(--surface); border:1px solid var(--border); border-radius:20px; box-shadow:var(--shadow); padding:32px 28px;}
+  .auth-brand{display:flex; align-items:center; gap:10px; margin-bottom:6px;}
+  .auth-brand .mark{width:34px; height:34px; border-radius:9px; background:var(--accent); color:var(--accent-ink); display:flex; align-items:center; justify-content:center; font-size:18px;}
+  .auth-brand h1{font-size:22px; font-weight:600; margin:0;}
+  .auth-sub{color:var(--text-muted); font-size:13.5px; margin:0 0 22px;}
+  .auth-tabs{display:flex; gap:4px; background:var(--surface-2); padding:4px; border-radius:10px; margin-bottom:20px;}
+  .auth-tabs button{flex:1; border:none; background:none; padding:8px; border-radius:7px; font-weight:600; font-size:13.5px; color:var(--text-muted);}
+  .auth-tabs button.active{background:var(--surface); color:var(--text); box-shadow:var(--shadow);}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em;}
+  .field input{width:100%; padding:11px 13px; border-radius:10px; border:1px solid var(--border); background:var(--bg); color:var(--text);}
+  .field input:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent);}
+  .btn{border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:10px; padding:10px 16px; font-weight:600;}
+  .btn:hover{background:var(--surface-2);}
+  .btn-primary{background:var(--accent); color:var(--accent-ink); border-color:var(--accent); width:100%; padding:12px; font-size:14.5px;}
+  .btn-primary:hover{filter:brightness(1.06);}
+  .btn-primary:disabled{opacity:.55; cursor:default;}
+  .auth-msg{font-size:13px; padding:10px 12px; border-radius:9px; margin-bottom:14px;}
+  .auth-msg.error{background:var(--p-high-bg); color:var(--p-high);}
+  .auth-msg.ok{background:var(--accent-soft); color:var(--accent);}
+  .config-warning{max-width:520px; margin:60px auto; background:var(--p-medium-bg); color:var(--p-medium); border-radius:14px; padding:20px 24px; font-size:14px; line-height:1.6;}
+
+  /* ---------------- App shell ---------------- */
+  #appScreen{display:grid; grid-template-columns:250px 1fr; min-height:100dvh;}
+  .sidebar{background:var(--surface); border-right:1px solid var(--border); padding:20px 16px; display:flex; flex-direction:column; gap:20px; position:sticky; top:0; height:100dvh; overflow-y:auto;}
+  .brand{display:flex; align-items:center; gap:9px;}
+  .brand .mark{width:28px; height:28px; border-radius:8px; background:var(--accent); color:var(--accent-ink); display:flex; align-items:center; justify-content:center; font-size:15px;}
+  .brand h1{font-size:18px; margin:0; font-weight:600;}
+  .nav{display:flex; flex-direction:column; gap:2px;}
+  .nav button{display:flex; justify-content:space-between; align-items:center; border:none; background:none; text-align:left; padding:9px 10px; border-radius:9px; color:var(--text-muted); font-weight:600; font-size:14px;}
+  .nav button.active{background:var(--accent-soft); color:var(--accent);}
+  .nav button .count{font-size:12px; font-weight:600; color:var(--text-faint);}
+  .nav button.active .count{color:var(--accent);}
+  .side-group{display:flex; flex-direction:column; gap:8px;}
+  .side-group .label{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint);}
+  .chipset{display:flex; gap:6px; flex-wrap:wrap;}
+  .chipset button{border:1px solid var(--border); background:var(--surface-2); border-radius:999px; padding:5px 10px; font-size:12px; color:var(--text-muted); font-weight:600;}
+  .chipset button.active{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
+  .side-list{display:flex; flex-direction:column; gap:2px;}
+  .side-list button{display:flex; align-items:center; gap:7px; border:none; background:none; text-align:left; padding:6px 8px; border-radius:8px; font-size:13px; color:var(--text-muted); font-weight:500;}
+  .side-list button.active{background:var(--surface-2); color:var(--text); font-weight:600;}
+  .dot{width:9px; height:9px; border-radius:50%; flex:none;}
+  .sidebar-foot{margin-top:auto; padding-top:12px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .user-email{font-size:12px; color:var(--text-faint); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .icon-btn{border:1px solid var(--border); background:var(--surface); border-radius:8px; padding:7px 9px; color:var(--text-muted); line-height:1;}
+  .icon-btn:hover{background:var(--surface-2); color:var(--text);}
+
+  .main{padding:26px 32px 80px; max-width:900px;}
+  .topbar{display:flex; gap:10px; align-items:center; margin-bottom:20px; flex-wrap:wrap;}
+  .topbar h2{font-size:24px; margin:0; font-weight:600; flex:none;}
+  #search{flex:1; min-width:160px; padding:10px 13px; border-radius:10px; border:1px solid var(--border); background:var(--surface); color:var(--text);}
+  select.sort-select{padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:var(--surface); color:var(--text);}
+  .menu-btn{display:none;}
+
+  #taskList{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px;}
+  li.task{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:13px 14px 13px 0; position:relative; overflow:hidden;}
+  li.task::before{content:""; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--p-low);}
+  li.task[data-priority="high"]::before{background:var(--p-high);}
+  li.task[data-priority="medium"]::before{background:var(--p-medium);}
+  li.task[data-priority="low"]::before{background:var(--p-low);}
+  li.task[data-status="done"]{opacity:.6;}
+  li.task[data-status="done"] .title{text-decoration:line-through; color:var(--text-muted);}
+  .task-row{display:flex; gap:11px; padding-left:14px; cursor:pointer;}
+  .chk-done{width:20px; height:20px; margin-top:2px; accent-color:var(--good); flex:none;}
+  .task-main{flex:1; min-width:0;}
+  .task-top{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .title{font-weight:600; font-size:15.5px; flex:1; min-width:80px; word-break:break-word;}
+  .badge{border-radius:7px; padding:3px 8px; font-size:11px; font-weight:700; letter-spacing:.02em;}
+  .prio-badge[data-p="high"]{background:var(--p-high-bg); color:var(--p-high);}
+  .prio-badge[data-p="medium"]{background:var(--p-medium-bg); color:var(--p-medium);}
+  .prio-badge[data-p="low"]{background:var(--p-low-bg); color:var(--p-low);}
+  .type-badge{background:var(--surface-2); color:var(--text-muted);}
+  .type-badge.recurring{background:var(--accent-soft); color:var(--accent);}
+  .due-badge{font-size:11.5px; color:var(--text-muted); font-weight:600;}
+  .due-badge.overdue{color:var(--danger);}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin-top:7px;}
+  .chip{display:inline-flex; align-items:center; gap:4px; border-radius:999px; padding:3px 9px; font-size:12px; font-weight:600;}
+  .chip.solo{background:var(--surface-2); color:var(--text-muted);}
+  .expand-caret{color:var(--text-faint); flex:none; padding:4px; font-size:12px;}
+
+  .detail{margin-top:12px; padding-top:12px; border-top:1px dashed var(--border); display:grid; gap:12px; cursor:default;}
+  .field-row{display:grid; gap:6px;}
+  .field-row .flabel{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text-faint);}
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  textarea.desc-input, input.detail-input, select.detail-input{width:100%; padding:8px 10px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); resize:vertical;}
+  .recur-row{display:flex; gap:6px; align-items:center;}
+  .recur-row input{width:56px;}
+  .tag-add{display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
+  .tag-add input{flex:1; min-width:100px; padding:7px 9px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text);}
+  .kind-toggle{display:flex; border:1px solid var(--border); border-radius:8px; overflow:hidden;}
+  .kind-toggle button{border:none; background:var(--surface); padding:7px 10px; font-size:12.5px; color:var(--text-muted); flex:1;}
+  .kind-toggle button.active{background:var(--accent-soft); color:var(--accent); font-weight:700;}
+  .chip .rm{border:none; background:none; color:inherit; opacity:.65; font-size:12px; padding:0; line-height:1;}
+  ul.subtasks{list-style:none; margin:0; padding:0; display:grid; gap:5px;}
+  li.subtask{display:flex; align-items:center; gap:7px; font-size:13.5px;}
+  li.subtask input[type=checkbox]{accent-color:var(--good);}
+  li.subtask.done .sub-text{text-decoration:line-through; color:var(--text-faint);}
+  li.subtask .sub-del{border:none; background:none; color:var(--text-faint);}
+  .sub-add{display:flex; gap:6px;}
+  .sub-add input{flex:1; padding:7px 9px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text);}
+  .detail-actions{display:flex; justify-content:flex-end; gap:8px;}
+  .btn-danger{color:var(--danger); border-color:var(--p-high-bg); background:var(--p-high-bg);}
+  .team-fields{display:grid; gap:10px; margin-top:10px; padding:10px; border:1px dashed var(--border); border-radius:10px;}
+
+  #emptyState, #notesEmptyState{text-align:center; padding:70px 16px; color:var(--text-muted);}
+  #emptyState .big, #notesEmptyState .big{font-size:36px; margin-bottom:8px;}
+
+  /* ---------------- Notes (post-its) ---------------- */
+  .notes-toolbar{display:flex; gap:10px; margin-bottom:20px; align-items:flex-start;}
+  .notes-toolbar textarea{flex:1; min-height:46px; max-height:160px; padding:11px 13px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--text); resize:vertical;}
+  .notes-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(190px,1fr)); gap:18px;}
+  .note-card{border-radius:8px; padding:14px 14px 11px; box-shadow:0 3px 10px rgba(30,26,18,.14); min-height:130px; display:flex; flex-direction:column; gap:10px;}
+  .note-content{flex:1; outline:none; font-size:14.5px; line-height:1.55; font-family:"Fraunces", Georgia, serif; white-space:pre-wrap; word-break:break-word;}
+  .note-foot{display:flex; align-items:center; justify-content:space-between; gap:6px;}
+  .note-date{font-size:11px; opacity:.6;}
+  .note-actions{display:flex; gap:6px;}
+  .note-actions button{border:none; background:rgba(0,0,0,.08); border-radius:7px; padding:4px 7px; font-size:12px; color:inherit;}
+  .note-actions button:hover{background:rgba(0,0,0,.16);}
+
+  /* Add-task modal */
+  .modal-overlay{position:fixed; inset:0; background:rgba(20,18,14,.45); display:flex; align-items:flex-start; justify-content:center; padding:5vh 16px; z-index:50; overflow-y:auto;}
+  .modal{width:100%; max-width:520px; background:var(--surface); border-radius:18px; box-shadow:var(--shadow); padding:24px; margin-bottom:40px;}
+  .modal h3{margin:0 0 16px; font-size:18px; font-weight:600;}
+
+  @media (max-width:820px){
+    #appScreen{grid-template-columns:1fr;}
+    .sidebar{position:fixed; left:-280px; top:0; width:260px; z-index:60; transition:left .2s ease; box-shadow:var(--shadow);}
+    .sidebar.open{left:0;}
+    .sidebar-scrim{display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:55;}
+    .sidebar-scrim.show{display:block;}
+    .menu-btn{display:inline-flex;}
+    .main{padding:16px 14px 90px;}
+    .topbar h2{font-size:20px;}
+  }
+  @media (prefers-reduced-motion: reduce){ .sidebar{transition:none;} }
+</style>
+</head>
+<body>
+
+<div id="configWarning" class="config-warning" hidden>
+  <strong>Setup needed:</strong> open <code>index.html</code> and replace <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code>
+  near the top of the script with your Supabase project's values (Project Settings → API), then reload this page.
+</div>
+
+<div id="authScreen" hidden>
+  <div class="auth-card">
+    <div class="auth-brand"><div class="mark">✅</div><h1 class="display">Taskboard</h1></div>
+    <p class="auth-sub">Your tasks, synced everywhere you log in.</p>
+    <div class="auth-tabs">
+      <button type="button" id="tabLogin" class="active">Log in</button>
+      <button type="button" id="tabSignup">Sign up</button>
+    </div>
+    <div id="authMsg"></div>
+    <form id="authForm">
+      <div class="field"><label>Email</label><input type="email" id="authEmail" required autocomplete="username"></div>
+      <div class="field"><label>Password</label><input type="password" id="authPassword" required autocomplete="current-password" minlength="6"></div>
+      <button type="submit" class="btn btn-primary" id="authSubmit">Log in</button>
+    </form>
+  </div>
+</div>
+
+<div id="appScreen" hidden>
+  <div class="sidebar-scrim" id="sidebarScrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="mark">✅</div><h1 class="display">Taskboard</h1></div>
+    <nav class="nav" id="viewNav">
+      <button type="button" data-view="active" class="active">Active <span class="count" id="countActive">0</span></button>
+      <button type="button" data-view="completed">Completed <span class="count" id="countDone">0</span></button>
+      <button type="button" data-view="notes">Post-its <span class="count" id="countNotes">0</span></button>
+    </nav>
+    <div id="taskFilters" style="display:flex; flex-direction:column; gap:20px;">
+      <div class="side-group">
+        <div class="label">Priority</div>
+        <div class="chipset" id="fPriority">
+          <button type="button" data-val="high">High</button>
+          <button type="button" data-val="medium">Medium</button>
+          <button type="button" data-val="low">Low</button>
+        </div>
+      </div>
+      <div class="side-group">
+        <div class="label">Type</div>
+        <div class="chipset" id="fType">
+          <button type="button" data-val="one-time">One-time</button>
+          <button type="button" data-val="recurring">Recurring</button>
+          <button type="button" data-val="followup">Follow-up</button>
+        </div>
+      </div>
+      <div class="side-group">
+        <div class="label">Working</div>
+        <div class="chipset" id="fWorkMode">
+          <button type="button" data-val="solo">Solo</button>
+          <button type="button" data-val="team">With team</button>
+        </div>
+      </div>
+      <div class="side-group">
+        <div class="label">Team</div>
+        <div class="side-list" id="fTeam"></div>
+      </div>
+      <div class="side-group">
+        <div class="label">Team member</div>
+        <div class="side-list" id="fTeamMember"></div>
+      </div>
+      <div class="side-group">
+        <div class="label">Category</div>
+        <div class="side-list" id="fCategory"></div>
+      </div>
+    </div>
+    <div class="sidebar-foot">
+      <span class="user-email" id="userEmail"></span>
+      <button type="button" class="icon-btn" id="signOutBtn" title="Sign out">⏻</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <button type="button" class="icon-btn menu-btn" id="menuBtn">☰</button>
+      <h2 id="viewTitle">Active</h2>
+      <input type="text" id="search" placeholder="Search…">
+      <select class="sort-select" id="sortSelect">
+        <option value="priority">Priority</option>
+        <option value="due">Due date</option>
+        <option value="created">Newest</option>
+        <option value="az">A–Z</option>
+      </select>
+      <button type="button" class="btn btn-primary" id="newTaskBtn" style="width:auto;">+ New task</button>
+    </div>
+
+    <div id="tasksSection">
+      <div id="emptyState" hidden>
+        <div class="big">🗒️</div>
+        <div><strong id="emptyTitle">No tasks yet</strong></div>
+        <div style="font-size:13px; margin-top:2px;" id="emptySub">Click "+ New task" to add your first one.</div>
+      </div>
+      <ul id="taskList"></ul>
+    </div>
+
+    <div id="notesSection" hidden>
+      <div class="notes-toolbar">
+        <textarea id="noteInput" placeholder="Jot something down…"></textarea>
+        <button type="button" class="btn btn-primary" style="width:auto;" id="addNoteBtn">Add</button>
+      </div>
+      <div id="notesEmptyState" hidden>
+        <div class="big">📌</div>
+        <div><strong>No post-its yet</strong></div>
+        <div style="font-size:13px; margin-top:2px;">Quick notes to yourself — not tasks, just reminders you can convert or delete later.</div>
+      </div>
+      <div class="notes-grid" id="notesGrid"></div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" hidden>
+  <div class="modal">
+    <h3 id="modalTitle">New task</h3>
+    <form id="taskForm">
+      <div class="field-row" style="margin-bottom:12px;">
+        <span class="flabel">Title</span>
+        <input class="detail-input" id="fTitle" required placeholder="What needs to happen?">
+      </div>
+      <div class="two-col" style="margin-bottom:12px;">
+        <div class="field-row">
+          <span class="flabel">Priority</span>
+          <select class="detail-input" id="fPriorityInput">
+            <option value="high">High priority</option>
+            <option value="medium" selected>Medium priority</option>
+            <option value="low">Low priority</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <span class="flabel">Due date</span>
+          <input class="detail-input" type="date" id="fDue">
+        </div>
+      </div>
+      <div class="field-row" style="margin-bottom:12px;">
+        <span class="flabel">Type</span>
+        <select class="detail-input" id="fType2">
+          <option value="one-time">One-time</option>
+          <option value="recurring">Recurring</option>
+          <option value="followup">Follow-up (repeats until done)</option>
+        </select>
+      </div>
+      <div class="recur-row" id="recurRow" hidden style="margin-bottom:12px;">
+        <span class="flabel" style="text-transform:none; font-weight:500;">Repeats every</span>
+        <input class="detail-input" type="number" id="fRecurN" min="1" value="1">
+        <select class="detail-input" id="fRecurUnit">
+          <option value="day">day(s)</option>
+          <option value="week" selected>week(s)</option>
+          <option value="month">month(s)</option>
+        </select>
+      </div>
+      <div class="field-row" style="margin-bottom:12px;">
+        <span class="flabel">Who's doing this</span>
+        <div class="kind-toggle" id="fWorkModeToggle">
+          <button type="button" data-val="solo" class="active">🧍 Just me</button>
+          <button type="button" data-val="team">👥 With a team</button>
+        </div>
+        <div class="team-fields" id="teamFieldsWrap" hidden>
+          <div class="field-row">
+            <span class="flabel">Team name</span>
+            <input class="detail-input" id="fTeamName" placeholder="e.g. Marketing team">
+          </div>
+          <div class="field-row">
+            <span class="flabel">Team member(s)</span>
+            <div class="tag-add"><input id="fTeamMemberInput" placeholder="Name, press Enter"></div>
+            <div class="chips" id="fTeamMemberChips"></div>
+          </div>
+        </div>
+      </div>
+      <div class="field-row" style="margin-bottom:12px;">
+        <span class="flabel">Category / tag</span>
+        <div class="tag-add"><input id="fCategoryInput" placeholder="e.g. Ops, press Enter"></div>
+        <div class="chips" id="fCategoryChips"></div>
+      </div>
+      <div class="field-row" style="margin-bottom:12px;">
+        <span class="flabel">Description</span>
+        <textarea class="desc-input" id="fDescription" rows="2" placeholder="Any extra detail…"></textarea>
+      </div>
+      <div class="field-row" style="margin-bottom:16px;">
+        <span class="flabel">Subtasks</span>
+        <ul class="subtasks" id="fSubtasks"></ul>
+        <div class="sub-add"><input id="fSubtaskInput" placeholder="Add a subtask, press Enter"></div>
+      </div>
+      <div class="detail-actions">
+        <button type="button" class="btn btn-danger" id="deleteTaskBtn" hidden>Delete</button>
+        <button type="button" class="btn" id="cancelModalBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary" style="width:auto;" id="saveTaskBtn">Add task</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const SUPABASE_URL = "https://orgrajbunvjisscgxhns.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yZ3JhamJ1bnZqaXNzY2d4aG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MTA4OTksImV4cCI6MjEwNTI4Njg5OX0.yj4jgImOu5gNxTE_y_1Q8u1UxzDCgaSf55IcGZvN7RU";
+
+if(SUPABASE_URL.startsWith("REPLACE_WITH")){
+  document.getElementById("configWarning").hidden = false;
+  throw new Error("Supabase not configured yet.");
+}
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const PALETTE = ["#2F6F62","#7A4FC9","#C2478A","#4A55C7","#A9633B","#4C8B3B","#1C8CA8","#B15A2E"];
+function hashColor(str){
+  let h = 0;
+  for(let i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) >>> 0; }
+  return PALETTE[h % PALETTE.length];
+}
+const NOTE_COLORS = [
+  { bg:"#FFF3C4", ink:"#6B5A12" },
+  { bg:"#FFE0E0", ink:"#7A2E2E" },
+  { bg:"#DCEAFB", ink:"#254A73" },
+  { bg:"#E3F5DC", ink:"#33592A" },
+  { bg:"#F0E3FB", ink:"#54306B" }
+];
+const NOTE_ANGLES = [-2, 1, -1, 2, 0];
+function noteStyle(id){
+  let h = 0;
+  for(let i=0;i<id.length;i++){ h = (h*31 + id.charCodeAt(i)) >>> 0; }
+  return { color: NOTE_COLORS[h % NOTE_COLORS.length], angle: NOTE_ANGLES[h % NOTE_ANGLES.length] };
+}
+const PRIORITY_RANK = { high:0, medium:1, low:2 };
+const PRIORITY_LABEL = { high:"High", medium:"Medium", low:"Low" };
+
+let session = null;
+let tasks = [];
+let notes = [];
+let view = "active";
+let sortKey = "priority";
+let search = "";
+let filters = { priority:new Set(), type:new Set(), workMode:new Set(), team:new Set(), teamMember:new Set(), category:new Set() };
+let editingTaskId = null;
+let convertingNoteId = null;
+let modalWorkMode = "solo";
+let modalTeamMembers = [];
+let modalCategories = [];
+let modalSubtasks = [];
+
+/* ---------------- Auth ---------------- */
+const authScreen = document.getElementById("authScreen");
+const appScreen = document.getElementById("appScreen");
+const authForm = document.getElementById("authForm");
+const authMsg = document.getElementById("authMsg");
+const authSubmit = document.getElementById("authSubmit");
+let authMode = "login";
+
+document.getElementById("tabLogin").addEventListener("click", () => setAuthMode("login"));
+document.getElementById("tabSignup").addEventListener("click", () => setAuthMode("signup"));
+function setAuthMode(mode){
+  authMode = mode;
+  document.getElementById("tabLogin").classList.toggle("active", mode === "login");
+  document.getElementById("tabSignup").classList.toggle("active", mode === "signup");
+  authSubmit.textContent = mode === "login" ? "Log in" : "Create account";
+  authMsg.innerHTML = "";
+}
+
+authForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+  authSubmit.disabled = true;
+  authMsg.innerHTML = "";
+  try{
+    if(authMode === "login"){
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if(error) throw error;
+    } else {
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if(error) throw error;
+      if(data.user && !data.session){
+        authMsg.innerHTML = '<div class="auth-msg ok">Account created — check your email to confirm, then log in.</div>';
+        setAuthMode("login");
+      }
+    }
+  } catch(err){
+    authMsg.innerHTML = '<div class="auth-msg error">' + escapeHtml(err.message) + "</div>";
+  } finally {
+    authSubmit.disabled = false;
+  }
+});
+
+document.getElementById("signOutBtn").addEventListener("click", async () => {
+  await supabase.auth.signOut();
+});
+
+supabase.auth.onAuthStateChange((_event, sess) => {
+  session = sess;
+  if(session){
+    authScreen.hidden = true;
+    appScreen.hidden = false;
+    document.getElementById("userEmail").textContent = session.user.email;
+    fetchTasks();
+    fetchNotes();
+    subscribeRealtime();
+  } else {
+    appScreen.hidden = true;
+    authScreen.hidden = false;
+  }
+});
+
+/* ---------------- Data: tasks ---------------- */
+let taskChannel = null, noteChannel = null;
+async function fetchTasks(){
+  const { data, error } = await supabase.from("tasks").select("*").order("created_at", { ascending:false });
+  if(error){ console.error(error); return; }
+  tasks = data;
+  render();
+}
+async function fetchNotes(){
+  const { data, error } = await supabase.from("notes").select("*").order("created_at", { ascending:false });
+  if(error){ console.error(error); return; }
+  notes = data;
+  render();
+}
+function subscribeRealtime(){
+  if(taskChannel) supabase.removeChannel(taskChannel);
+  if(noteChannel) supabase.removeChannel(noteChannel);
+  taskChannel = supabase.channel("tasks-changes")
+    .on("postgres_changes", { event:"*", schema:"public", table:"tasks", filter:"user_id=eq." + session.user.id }, () => fetchTasks())
+    .subscribe();
+  noteChannel = supabase.channel("notes-changes")
+    .on("postgres_changes", { event:"*", schema:"public", table:"notes", filter:"user_id=eq." + session.user.id }, () => fetchNotes())
+    .subscribe();
+}
+
+function shiftDate(dateStr, unit, n){
+  const dt = new Date(dateStr + "T00:00:00");
+  if(unit === "day") dt.setDate(dt.getDate() + n);
+  if(unit === "week") dt.setDate(dt.getDate() + n*7);
+  if(unit === "month") dt.setMonth(dt.getMonth() + n);
+  return dt.toISOString().slice(0,10);
+}
+
+async function toggleDone(task, checked){
+  if(checked && task.type !== "one-time"){
+    let nextDue = task.due_date;
+    if(task.type === "recurring" && task.due_date && task.recur_unit && task.recur_n){
+      nextDue = shiftDate(task.due_date, task.recur_unit, task.recur_n);
+    }
+    await supabase.from("tasks").insert({
+      title: task.title, description: task.description, priority: task.priority,
+      type: task.type, recur_unit: task.recur_unit, recur_n: task.recur_n,
+      due_date: nextDue, work_mode: task.work_mode, team_name: task.team_name,
+      team_members: task.team_members, categories: task.categories,
+      subtasks: (task.subtasks||[]).map(s => ({ text:s.text, done:false })),
+      status: "active"
+    });
+  }
+  await supabase.from("tasks").update({
+    status: checked ? "done" : "active",
+    completed_at: checked ? new Date().toISOString() : null
+  }).eq("id", task.id);
+  fetchTasks();
+}
+async function deleteTask(id){
+  await supabase.from("tasks").delete().eq("id", id);
+  fetchTasks();
+}
+async function toggleSubtask(task, idx){
+  const subtasks = (task.subtasks||[]).map((s,i) => i===idx ? { ...s, done: !s.done } : s);
+  await supabase.from("tasks").update({ subtasks }).eq("id", task.id);
+  fetchTasks();
+}
+
+/* ---------------- Data: notes ---------------- */
+async function addNote(content){
+  if(!content.trim()) return;
+  await supabase.from("notes").insert({ content: content.trim() });
+  fetchNotes();
+}
+async function updateNoteContent(id, content){
+  await supabase.from("notes").update({ content }).eq("id", id);
+  fetchNotes();
+}
+async function deleteNote(id){
+  await supabase.from("notes").delete().eq("id", id);
+  fetchNotes();
+}
+function convertNoteToTask(note){
+  convertingNoteId = note.id;
+  openModal(null);
+  document.getElementById("fTitle").value = note.content.length > 120 ? note.content.slice(0,120) : note.content;
+  if(note.content.length > 120) document.getElementById("fDescription").value = note.content;
+}
+
+/* ---------------- Sidebar nav / filters ---------------- */
+const viewTitles = { active:"Active", completed:"Completed", notes:"Post-its" };
+document.querySelectorAll("#viewNav button").forEach(b => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll("#viewNav button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    view = b.dataset.view;
+    document.getElementById("viewTitle").textContent = viewTitles[view];
+    document.getElementById("taskFilters").hidden = view === "notes";
+    document.getElementById("sortSelect").hidden = view === "notes";
+    document.getElementById("newTaskBtn").hidden = view === "notes";
+    document.getElementById("search").placeholder = view === "notes" ? "Search post-its…" : "Search tasks…";
+    document.getElementById("tasksSection").hidden = view === "notes";
+    document.getElementById("notesSection").hidden = view !== "notes";
+    closeSidebarOnMobile();
+    render();
+  });
+});
+function wireFilterChipset(id, key){
+  document.querySelectorAll("#"+id+" button").forEach(b => {
+    b.addEventListener("click", () => {
+      const v = b.dataset.val;
+      if(filters[key].has(v)){ filters[key].delete(v); b.classList.remove("active"); }
+      else { filters[key].add(v); b.classList.add("active"); }
+      render();
+    });
+  });
+}
+wireFilterChipset("fPriority","priority");
+wireFilterChipset("fType","type");
+wireFilterChipset("fWorkMode","workMode");
+
+document.getElementById("search").addEventListener("input", (e) => { search = e.target.value.toLowerCase(); render(); });
+document.getElementById("sortSelect").addEventListener("change", (e) => { sortKey = e.target.value; render(); });
+
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+const scrim = document.getElementById("sidebarScrim");
+menuBtn.addEventListener("click", () => { sidebar.classList.add("open"); scrim.classList.add("show"); });
+scrim.addEventListener("click", closeSidebarOnMobile);
+function closeSidebarOnMobile(){ sidebar.classList.remove("open"); scrim.classList.remove("show"); }
+
+/* ---------------- Render ---------------- */
+function escapeHtml(s){
+  return (s||"").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+}
+function fmtDate(d){
+  if(!d) return "";
+  const dt = new Date(d + "T00:00:00");
+  return dt.toLocaleDateString(undefined, { month:"short", day:"numeric" });
+}
+function isOverdue(t){ return t.due_date && t.status === "active" && new Date(t.due_date + "T23:59:59") < new Date(); }
+
+function render(){
+  if(view === "notes"){ renderNotes(); return; }
+
+  const active = tasks.filter(t => t.status === "active");
+  const done = tasks.filter(t => t.status === "done");
+  document.getElementById("countActive").textContent = active.length;
+  document.getElementById("countDone").textContent = done.length;
+  document.getElementById("countNotes").textContent = notes.length;
+
+  const names = { team:new Set(), teamMember:new Set(), category:new Set() };
+  tasks.forEach(t => {
+    if(t.team_name) names.team.add(t.team_name);
+    (t.team_members||[]).forEach(n => names.teamMember.add(n));
+    (t.categories||[]).forEach(c => names.category.add(c));
+  });
+  renderSideList("fTeam", names.team, "team");
+  renderSideList("fTeamMember", names.teamMember, "teamMember");
+  renderSideList("fCategory", names.category, "category");
+
+  let pool = view === "active" ? active : done;
+  pool = pool.filter(t => {
+    if(filters.priority.size && !filters.priority.has(t.priority)) return false;
+    if(filters.type.size && !filters.type.has(t.type)) return false;
+    if(filters.workMode.size && !filters.workMode.has(t.work_mode)) return false;
+    if(filters.team.size && !filters.team.has(t.team_name)) return false;
+    if(filters.teamMember.size && !(t.team_members||[]).some(n => filters.teamMember.has(n))) return false;
+    if(filters.category.size && !(t.categories||[]).some(c => filters.category.has(c))) return false;
+    if(search){
+      const hay = (t.title + " " + t.description + " " + (t.team_name||"") + " " +
+        (t.team_members||[]).join(" ") + " " + (t.categories||[]).join(" ")).toLowerCase();
+      if(hay.indexOf(search) === -1) return false;
+    }
+    return true;
+  });
+  pool.sort((a,b) => {
+    if(sortKey === "priority") return PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority];
+    if(sortKey === "due") return (a.due_date||"9999") < (b.due_date||"9999") ? -1 : (a.due_date||"9999") > (b.due_date||"9999") ? 1 : 0;
+    if(sortKey === "created") return new Date(b.created_at) - new Date(a.created_at);
+    if(sortKey === "az") return a.title.localeCompare(b.title);
+    return 0;
+  });
+
+  const list = document.getElementById("taskList");
+  list.innerHTML = "";
+  pool.forEach(t => list.appendChild(taskCard(t)));
+
+  const empty = document.getElementById("emptyState");
+  empty.hidden = pool.length !== 0;
+  document.getElementById("emptyTitle").textContent = view === "active" ? "No active tasks" : "Nothing completed yet";
+  document.getElementById("emptySub").textContent = view === "active" ? 'Click "+ New task" to add your first one.' : "Tasks you finish will show up here.";
+}
+
+function renderSideList(id, set, key){
+  const container = document.getElementById(id);
+  container.innerHTML = "";
+  Array.from(set).sort().forEach(name => {
+    const b = document.createElement("button");
+    b.type = "button";
+    if(filters[key].has(name)) b.classList.add("active");
+    const dot = document.createElement("span");
+    dot.className = "dot"; dot.style.background = hashColor(name);
+    b.appendChild(dot);
+    b.appendChild(document.createTextNode(name));
+    b.addEventListener("click", () => {
+      if(filters[key].has(name)) filters[key].delete(name); else filters[key].add(name);
+      render();
+    });
+    container.appendChild(b);
+  });
+}
+
+function taskCard(t){
+  const li = document.createElement("li");
+  li.className = "task";
+  li.dataset.priority = t.priority;
+  li.dataset.status = t.status;
+
+  const row = document.createElement("div");
+  row.className = "task-row";
+
+  const chk = document.createElement("input");
+  chk.type = "checkbox"; chk.className = "chk-done"; chk.checked = t.status === "done";
+  chk.addEventListener("click", e => e.stopPropagation());
+  chk.addEventListener("change", () => toggleDone(t, chk.checked));
+  row.appendChild(chk);
+
+  const main = document.createElement("div");
+  main.className = "task-main";
+
+  const top = document.createElement("div");
+  top.className = "task-top";
+  const title = document.createElement("span");
+  title.className = "title"; title.textContent = t.title;
+  top.appendChild(title);
+
+  const pb = document.createElement("span");
+  pb.className = "badge prio-badge"; pb.dataset.p = t.priority; pb.textContent = PRIORITY_LABEL[t.priority] || t.priority;
+  top.appendChild(pb);
+
+  if(t.type !== "one-time"){
+    const tb = document.createElement("span");
+    tb.className = "badge type-badge recurring";
+    tb.textContent = (t.type === "recurring" ? "⟳ Recurring" : "↻ Follow-up");
+    top.appendChild(tb);
+  }
+  if(t.due_date){
+    const db = document.createElement("span");
+    db.className = "due-badge mono" + (isOverdue(t) ? " overdue" : "");
+    db.textContent = "Due " + fmtDate(t.due_date);
+    top.appendChild(db);
+  }
+  const caret = document.createElement("span");
+  caret.className = "expand-caret"; caret.textContent = "⌄";
+  top.appendChild(caret);
+  main.appendChild(top);
+
+  const chips = document.createElement("div");
+  chips.className = "chips";
+  if(t.work_mode === "team"){
+    if(t.team_name){
+      const c = hashColor(t.team_name);
+      const chip = document.createElement("span");
+      chip.className = "chip"; chip.style.background = c + "22"; chip.style.color = c;
+      chip.textContent = "👥 " + t.team_name;
+      chips.appendChild(chip);
+    }
+    (t.team_members||[]).forEach(name => {
+      const c = hashColor(name);
+      const chip = document.createElement("span");
+      chip.className = "chip"; chip.style.background = c + "22"; chip.style.color = c;
+      chip.textContent = "👤 " + name;
+      chips.appendChild(chip);
+    });
+  } else {
+    const chip = document.createElement("span");
+    chip.className = "chip solo"; chip.textContent = "🧍 Solo";
+    chips.appendChild(chip);
+  }
+  (t.categories||[]).forEach(cat => {
+    const c = hashColor(cat);
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.style.background = c + "22"; chip.style.color = c;
+    chip.textContent = cat;
+    chips.appendChild(chip);
+  });
+  main.appendChild(chips);
+
+  const detail = document.createElement("div");
+  detail.className = "detail"; detail.hidden = true;
+  if(t.description){
+    const d = document.createElement("div"); d.style.fontSize = "14px"; d.style.color = "var(--text-muted)";
+    d.textContent = t.description;
+    detail.appendChild(d);
+  }
+  if((t.subtasks||[]).length){
+    const ul = document.createElement("ul"); ul.className = "subtasks";
+    t.subtasks.forEach((s, idx) => {
+      const sli = document.createElement("li");
+      sli.className = "subtask" + (s.done ? " done" : "");
+      const scb = document.createElement("input"); scb.type = "checkbox"; scb.checked = !!s.done;
+      scb.addEventListener("click", e => e.stopPropagation());
+      scb.addEventListener("change", () => toggleSubtask(t, idx));
+      const stx = document.createElement("span"); stx.className = "sub-text"; stx.textContent = s.text;
+      sli.appendChild(scb); sli.appendChild(stx);
+      ul.appendChild(sli);
+    });
+    detail.appendChild(ul);
+  }
+  const actions = document.createElement("div"); actions.className = "detail-actions";
+  const editBtn = document.createElement("button"); editBtn.type = "button"; editBtn.className = "btn"; editBtn.textContent = "Edit";
+  editBtn.addEventListener("click", e => { e.stopPropagation(); openModal(t); });
+  actions.appendChild(editBtn);
+  detail.appendChild(actions);
+  main.appendChild(detail);
+
+  row.appendChild(main);
+  li.appendChild(row);
+
+  row.addEventListener("click", () => { detail.hidden = !detail.hidden; caret.textContent = detail.hidden ? "⌄" : "⌃"; });
+
+  return li;
+}
+
+/* ---------------- Render: notes ---------------- */
+function renderNotes(){
+  document.getElementById("countActive").textContent = tasks.filter(t => t.status === "active").length;
+  document.getElementById("countDone").textContent = tasks.filter(t => t.status === "done").length;
+  document.getElementById("countNotes").textContent = notes.length;
+
+  let pool = notes;
+  if(search) pool = pool.filter(n => n.content.toLowerCase().indexOf(search) !== -1);
+
+  const grid = document.getElementById("notesGrid");
+  grid.innerHTML = "";
+  pool.forEach(n => grid.appendChild(noteCard(n)));
+  document.getElementById("notesEmptyState").hidden = pool.length !== 0;
+}
+
+function noteCard(n){
+  const style = noteStyle(n.id);
+  const card = document.createElement("div");
+  card.className = "note-card";
+  card.style.background = style.color.bg;
+  card.style.color = style.color.ink;
+  card.style.transform = "rotate(" + style.angle + "deg)";
+
+  const content = document.createElement("div");
+  content.className = "note-content";
+  content.contentEditable = "true";
+  content.textContent = n.content;
+  content.addEventListener("blur", () => {
+    const val = content.textContent.trim();
+    if(val && val !== n.content) updateNoteContent(n.id, val);
+    else if(!val) content.textContent = n.content;
+  });
+  card.appendChild(content);
+
+  const foot = document.createElement("div");
+  foot.className = "note-foot";
+  const date = document.createElement("span");
+  date.className = "note-date mono";
+  date.textContent = fmtDate(n.created_at.slice(0,10));
+  foot.appendChild(date);
+
+  const actions = document.createElement("div");
+  actions.className = "note-actions";
+  const convertBtn = document.createElement("button");
+  convertBtn.type = "button"; convertBtn.title = "Convert to task"; convertBtn.textContent = "→ Task";
+  convertBtn.addEventListener("click", () => convertNoteToTask(n));
+  const delBtn = document.createElement("button");
+  delBtn.type = "button"; delBtn.title = "Delete"; delBtn.textContent = "🗑";
+  delBtn.addEventListener("click", () => { if(confirm("Delete this post-it?")) deleteNote(n.id); });
+  actions.appendChild(convertBtn); actions.appendChild(delBtn);
+  foot.appendChild(actions);
+  card.appendChild(foot);
+
+  return card;
+}
+
+document.getElementById("addNoteBtn").addEventListener("click", () => {
+  const input = document.getElementById("noteInput");
+  addNote(input.value);
+  input.value = "";
+});
+document.getElementById("noteInput").addEventListener("keydown", e => {
+  if(e.key === "Enter" && (e.metaKey || e.ctrlKey)){
+    e.preventDefault();
+    addNote(e.target.value);
+    e.target.value = "";
+  }
+});
+
+/* ---------------- Modal (add / edit) ---------------- */
+const overlay = document.getElementById("modalOverlay");
+const taskForm = document.getElementById("taskForm");
+
+document.getElementById("newTaskBtn").addEventListener("click", () => openModal(null));
+document.getElementById("cancelModalBtn").addEventListener("click", closeModal);
+overlay.addEventListener("click", e => { if(e.target === overlay) closeModal(); });
+
+function setWorkMode(mode){
+  modalWorkMode = mode;
+  document.querySelectorAll("#fWorkModeToggle button").forEach(b => b.classList.toggle("active", b.dataset.val === mode));
+  document.getElementById("teamFieldsWrap").hidden = mode !== "team";
+}
+document.querySelectorAll("#fWorkModeToggle button").forEach(b => {
+  b.addEventListener("click", () => setWorkMode(b.dataset.val));
+});
+
+function openModal(task){
+  editingTaskId = task ? task.id : null;
+  document.getElementById("modalTitle").textContent = task ? "Edit task" : "New task";
+  document.getElementById("saveTaskBtn").textContent = task ? "Save changes" : "Add task";
+  document.getElementById("deleteTaskBtn").hidden = !task;
+
+  document.getElementById("fTitle").value = task ? task.title : "";
+  document.getElementById("fPriorityInput").value = task ? task.priority : "medium";
+  document.getElementById("fDue").value = task ? (task.due_date||"") : "";
+  document.getElementById("fType2").value = task ? task.type : "one-time";
+  document.getElementById("fRecurN").value = task && task.recur_n ? task.recur_n : "1";
+  document.getElementById("fRecurUnit").value = task && task.recur_unit ? task.recur_unit : "week";
+  document.getElementById("fDescription").value = task ? task.description : "";
+  document.getElementById("recurRow").hidden = !task || task.type !== "recurring";
+
+  document.getElementById("fTeamName").value = task ? (task.team_name||"") : "";
+  modalTeamMembers = task ? JSON.parse(JSON.stringify(task.team_members||[])) : [];
+  modalCategories = task ? JSON.parse(JSON.stringify(task.categories||[])) : [];
+  modalSubtasks = task ? JSON.parse(JSON.stringify(task.subtasks||[])) : [];
+  setWorkMode(task ? task.work_mode : "solo");
+  renderModalChips();
+
+  overlay.hidden = false;
+  document.getElementById("fTitle").focus();
+}
+function closeModal(){
+  overlay.hidden = true;
+  taskForm.reset();
+  convertingNoteId = null;
+}
+
+document.getElementById("fType2").addEventListener("change", e => {
+  document.getElementById("recurRow").hidden = e.target.value !== "recurring";
+});
+document.getElementById("fTeamMemberInput").addEventListener("keydown", e => {
+  if(e.key !== "Enter") return;
+  e.preventDefault();
+  const name = e.target.value.trim();
+  if(!name) return;
+  modalTeamMembers.push(name);
+  e.target.value = "";
+  renderModalChips();
+});
+document.getElementById("fCategoryInput").addEventListener("keydown", e => {
+  if(e.key !== "Enter") return;
+  e.preventDefault();
+  const name = e.target.value.trim();
+  if(!name) return;
+  modalCategories.push(name);
+  e.target.value = "";
+  renderModalChips();
+});
+document.getElementById("fSubtaskInput").addEventListener("keydown", e => {
+  if(e.key !== "Enter") return;
+  e.preventDefault();
+  const text = e.target.value.trim();
+  if(!text) return;
+  modalSubtasks.push({ text, done:false });
+  e.target.value = "";
+  renderModalChips();
+});
+
+function renderModalChips(){
+  const tc = document.getElementById("fTeamMemberChips"); tc.innerHTML = "";
+  modalTeamMembers.forEach((name, idx) => {
+    const c = hashColor(name);
+    const chip = document.createElement("span"); chip.className = "chip";
+    chip.style.background = c + "22"; chip.style.color = c;
+    chip.textContent = "👤 " + name + " ";
+    const rm = document.createElement("button"); rm.type = "button"; rm.className = "rm"; rm.textContent = "×";
+    rm.addEventListener("click", () => { modalTeamMembers.splice(idx,1); renderModalChips(); });
+    chip.appendChild(rm); tc.appendChild(chip);
+  });
+  const cc = document.getElementById("fCategoryChips"); cc.innerHTML = "";
+  modalCategories.forEach((name, idx) => {
+    const c = hashColor(name);
+    const chip = document.createElement("span"); chip.className = "chip";
+    chip.style.background = c + "22"; chip.style.color = c;
+    chip.textContent = name + " ";
+    const rm = document.createElement("button"); rm.type = "button"; rm.className = "rm"; rm.textContent = "×";
+    rm.addEventListener("click", () => { modalCategories.splice(idx,1); renderModalChips(); });
+    chip.appendChild(rm); cc.appendChild(chip);
+  });
+  const sl = document.getElementById("fSubtasks"); sl.innerHTML = "";
+  modalSubtasks.forEach((s, idx) => {
+    const li = document.createElement("li"); li.className = "subtask" + (s.done ? " done" : "");
+    const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = s.done;
+    cb.addEventListener("change", () => { modalSubtasks[idx].done = cb.checked; renderModalChips(); });
+    const tx = document.createElement("span"); tx.className = "sub-text"; tx.textContent = s.text;
+    const del = document.createElement("button"); del.type = "button"; del.className = "sub-del"; del.textContent = "×";
+    del.addEventListener("click", () => { modalSubtasks.splice(idx,1); renderModalChips(); });
+    li.appendChild(cb); li.appendChild(tx); li.appendChild(del);
+    sl.appendChild(li);
+  });
+}
+
+taskForm.addEventListener("submit", async e => {
+  e.preventDefault();
+  const type = document.getElementById("fType2").value;
+  const payload = {
+    title: document.getElementById("fTitle").value.trim(),
+    priority: document.getElementById("fPriorityInput").value,
+    due_date: document.getElementById("fDue").value || null,
+    type,
+    recur_n: type === "recurring" ? parseInt(document.getElementById("fRecurN").value || "1", 10) : null,
+    recur_unit: type === "recurring" ? document.getElementById("fRecurUnit").value : null,
+    description: document.getElementById("fDescription").value.trim(),
+    work_mode: modalWorkMode,
+    team_name: modalWorkMode === "team" ? document.getElementById("fTeamName").value.trim() : "",
+    team_members: modalWorkMode === "team" ? modalTeamMembers : [],
+    categories: modalCategories,
+    subtasks: modalSubtasks
+  };
+  if(!payload.title) return;
+  const wasConverting = convertingNoteId;
+  if(editingTaskId){
+    await supabase.from("tasks").update(payload).eq("id", editingTaskId);
+  } else {
+    await supabase.from("tasks").insert(payload);
+  }
+  if(wasConverting) await deleteNote(wasConverting);
+  closeModal();
+  fetchTasks();
+});
+
+document.getElementById("deleteTaskBtn").addEventListener("click", async () => {
+  if(!editingTaskId) return;
+  if(confirm("Delete this task? This can't be undone.")){
+    await deleteTask(editingTaskId);
+    closeModal();
+  }
+});
+
+/* ---------------- Boot ---------------- */
+supabase.auth.getSession().then(({ data }) => {
+  session = data.session;
+  if(session){
+    authScreen.hidden = true; appScreen.hidden = false;
+    document.getElementById("userEmail").textContent = session.user.email;
+    fetchTasks(); fetchNotes(); subscribeRealtime();
+  } else {
+    authScreen.hidden = false;
+  }
+});
+</script>
+</body>
+</html>
